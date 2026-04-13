@@ -33,7 +33,7 @@ const List<IntegranteModel> equipoItla = [
     nombre: 'Hansell Bonilla Parra',
     matricula: '20230220',
     telefono: '+18098773432',
-    telegram: 'TU_TELEGRAM',
+    telegram: 'Hansell Bonilla',
     correo: '20230220@itla.edu.do',
     rol: 'Desarrollador',
   )
