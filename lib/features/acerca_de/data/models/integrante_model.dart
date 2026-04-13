@@ -39,7 +39,7 @@ const List<IntegranteModel> equipoItla = [
     telefono: '+18098773342',
     telegram: 'Hansell Bonilla',
     correo: '20230220@itla.edu.do',
-    rol: 'Desarrollador 2',
+    rol: 'Desarrollador',
   ),
 
   // 👤 Tú
@@ -49,7 +49,7 @@ const List<IntegranteModel> equipoItla = [
     telefono: '+18092644746',
     telegram: 'MarcellCanario',
     correo: '20209759@itla.edu.do',
-    rol: 'Desarrollador 1',
+    rol: 'Desarrollador',
     fotoAsset: 'assets/images/team/marcell.jpg',
   ),
 ];
