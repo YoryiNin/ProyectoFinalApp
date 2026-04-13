@@ -28,4 +28,14 @@ const List<IntegranteModel> equipoItla = [
     correo: 'Yoryi.Nin@itla.edu.do',
     rol: 'Líder de Proyecto',
   ),
+
+  IntegranteModel(
+    nombre: 'Marcell Junior Canario Jiminian',
+    matricula: '2020-9759',
+    telefono: '+18092644746', 
+    telegram: 'MarcellCanario',
+    correo: '20209759@itla.edu.do',
+    rol: 'Desarrollador',
+    fotoAsset: 'assets/images/team/marcell.jpg'
+  ),
 ];
