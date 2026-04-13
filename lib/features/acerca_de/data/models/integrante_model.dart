@@ -28,4 +28,15 @@ const List<IntegranteModel> equipoItla = [
     correo: 'Yoryi.Nin@itla.edu.do',
     rol: 'Líder de Proyecto',
   ),
+
+  IntegranteModel(
+    nombre: 'Hansell Bonilla Parra',
+    matricula: '20230220',
+    telefono: '+18098773432',
+    telegram: 'TU_TELEGRAM',
+    correo: '20230220@itla.edu.do',
+    rol: 'Desarrollador',
+  )
 ];
+
+
