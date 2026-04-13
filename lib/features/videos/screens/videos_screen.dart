@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart'; // 🔥 NUEVO
 import 'package:taller_itla_app/features/videos/presentation/providers/videos_provider.dart';
 import 'package:taller_itla_app/features/videos/presentation/widgets/categoria_filter.dart';
 import 'package:taller_itla_app/features/videos/presentation/widgets/video_card.dart';
-import 'package:taller_itla_app/features/videos/screens/video_player_screen.dart';
 import 'package:taller_itla_app/theme/app_colors.dart';
 import 'package:taller_itla_app/theme/app_text_styles.dart';
 import '../../../../../core/widgets/main_scaffold.dart';
@@ -40,7 +40,6 @@ class VideosScreen extends ConsumerWidget {
                       ],
                     ),
                     const Spacer(),
-                    // Contador de videos
                     videosAsync.when(
                       data: (videos) => Container(
                         padding: const EdgeInsets.symmetric(
@@ -67,12 +66,12 @@ class VideosScreen extends ConsumerWidget {
 
               const SizedBox(height: 20),
 
-              // Filtro de categorías
+              // Filtro
               const CategoriaFilter(),
 
               const SizedBox(height: 16),
 
-              // Lista de videos
+              // Lista
               Expanded(
                 child: videosAsync.when(
                   data: (videos) {
@@ -128,20 +127,20 @@ class VideosScreen extends ConsumerWidget {
                       itemCount: videosFiltrados.length,
                       itemBuilder: (context, index) {
                         final video = videosFiltrados[index];
+
                         return VideoCard(
                           video: video,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => VideoPlayerScreen(
-                                  youtubeId: video.youtubeId,
-                                  titulo: video.titulo,
-                                  descripcion: video.descripcion,
-                                  categoria: video.categoria,
-                                ),
-                              ),
+                          onTap: () async {
+                            final url = Uri.parse(
+                              "https://www.youtube.com/watch?v=${video.youtubeId}",
                             );
+
+                            if (await canLaunchUrl(url)) {
+                              await launchUrl(
+                                url,
+                                mode: LaunchMode.externalApplication,
+                              );
+                            }
                           },
                         );
                       },
@@ -229,7 +228,11 @@ class _ShimmerCardState extends State<_ShimmerCard>
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..repeat(reverse: true);
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
@@ -245,10 +248,14 @@ class _ShimmerCardState extends State<_ShimmerCard>
       builder: (_, __) => Container(
         decoration: BoxDecoration(
           color: Color.lerp(
-              AppColors.surfaceVariant, AppColors.overlay, _animation.value),
+            AppColors.surfaceVariant,
+            AppColors.overlay,
+            _animation.value,
+          ),
           borderRadius: BorderRadius.circular(12),
         ),
       ),
     );
   }
 }
+
