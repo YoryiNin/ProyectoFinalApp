@@ -32,6 +32,16 @@ const List<IntegranteModel> equipoItla = [
     rol: 'Líder de Proyecto',
   ),
 
+// 👤 Marcell Canario 
+  IntegranteModel(
+    nombre: 'Marcell Junior Canario Jiminian',
+    matricula: '2020-9759',
+    telefono: '+18092644746',
+    telegram: 'MarcellCanario',
+    correo: '20209759@itla.edu.do',
+    rol: 'Desarrollador',
+    fotoAsset: 'assets/images/team/marcell.jpg',
+  ),
   // 👤 Hansell
   IntegranteModel(
     nombre: 'Hansell Bonilla Parra',
@@ -51,17 +61,5 @@ const List<IntegranteModel> equipoItla = [
     correo: '20231581@itla.edu.do',
     rol: 'Desarrollador',
     fotoAsset: 'assets/images/team/robertson.jpg',
-  ),
-
-
-  // 👤 Tú
-  IntegranteModel(
-    nombre: 'Marcell Junior Canario Jiminian',
-    matricula: '2020-9759',
-    telefono: '+18092644746',
-    telegram: 'MarcellCanario',
-    correo: '20209759@itla.edu.do',
-    rol: 'Desarrollador',
-    fotoAsset: 'assets/images/team/marcell.jpg',
   ),
 ];
