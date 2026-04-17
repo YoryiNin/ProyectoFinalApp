@@ -62,4 +62,15 @@ const List<IntegranteModel> equipoItla = [
     rol: 'Desarrollador',
     fotoAsset: 'assets/images/team/robertson.jpg',
   ),
+  
+  // 👤 Ismael
+  IntegranteModel(
+    nombre: 'George Ismael Hodge Abad',
+    matricula: '2022-0469',
+    telefono: '+18295578263',
+    telegram: 'G.I',
+    correo: '20220469@itla.edu.do',
+    rol: 'Desarrollador',
+    fotoAsset: 'assets/images/team/Abad.jpeg',
+  ),
 ];
