@@ -42,6 +42,17 @@ const List<IntegranteModel> equipoItla = [
     rol: 'Desarrollador',
   ),
 
+  // 👤 Robertson
+  IntegranteModel(
+    nombre: 'Robertson Stiwel Matos Suero.',
+    matricula: '20231581',
+    telefono: '+18495130829',
+    telegram: 'ValoyValoy',
+    correo: '20231581@itla.edu.do',
+    rol: 'Desarrollador',
+  ),
+
+
   // 👤 Tú
   IntegranteModel(
     nombre: 'Marcell Junior Canario Jiminian',
