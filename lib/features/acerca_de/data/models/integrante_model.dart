@@ -50,6 +50,7 @@ const List<IntegranteModel> equipoItla = [
     telegram: 'ValoyValoy',
     correo: '20231581@itla.edu.do',
     rol: 'Desarrollador',
+    fotoAsset: 'assets/images/team/robertson.jpg',
   ),
 
 
