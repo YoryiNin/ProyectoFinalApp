@@ -1,10 +1,12 @@
+import 'package:flutter/material.dart';
+
 class IntegranteModel {
+  final String? fotoAsset;
   final String nombre;
   final String matricula;
   final String telefono;
   final String telegram;
   final String correo;
-  final String? fotoAsset; // 'assets/images/team/nombre.jpg' (opcional)
   final String rol;
 
   const IntegranteModel({
@@ -18,8 +20,9 @@ class IntegranteModel {
   });
 }
 
-// ─── DATOS DEL EQUIPO — Edita aquí con los datos reales ───────────────────────
+// ——— DATOS DEL EQUIPO ———
 const List<IntegranteModel> equipoItla = [
+  // 👑 Líder
   IntegranteModel(
     nombre: 'Yoryi Nin de la Rosa',
     matricula: '20231370',
@@ -29,14 +32,36 @@ const List<IntegranteModel> equipoItla = [
     rol: 'Líder de Proyecto',
   ),
 
+  // 👤 Hansell
   IntegranteModel(
     nombre: 'Hansell Bonilla Parra',
     matricula: '20230220',
-    telefono: '+18098773432',
+    telefono: '+18098773342',
     telegram: 'Hansell Bonilla',
     correo: '20230220@itla.edu.do',
     rol: 'Desarrollador',
-  )
+  ),
+
+  // 👤 Robertson
+  IntegranteModel(
+    nombre: 'Robertson Stiwel Matos Suero.',
+    matricula: '20231581',
+    telefono: '+18495130829',
+    telegram: 'ValoyValoy',
+    correo: '20231581@itla.edu.do',
+    rol: 'Desarrollador',
+    fotoAsset: 'assets/images/team/robertson.jpg',
+  ),
+
+
+  // 👤 Tú
+  IntegranteModel(
+    nombre: 'Marcell Junior Canario Jiminian',
+    matricula: '2020-9759',
+    telefono: '+18092644746',
+    telegram: 'MarcellCanario',
+    correo: '20209759@itla.edu.do',
+    rol: 'Desarrollador',
+    fotoAsset: 'assets/images/team/marcell.jpg',
+  ),
 ];
-
-
