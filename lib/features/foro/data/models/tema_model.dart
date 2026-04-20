@@ -20,8 +20,8 @@ class RespuestaModel {
       id: json['id']?.toString() ?? '',
       contenido: json['contenido'] ?? json['respuesta'] ?? '',
       autor: json['autor'] ?? json['nombre'] ?? 'Anónimo',
-      fecha: json['fecha'] ?? '',
-      autorFotoUrl: json['foto'] ?? json['fotoUrl'],
+      fecha: json['fecha'] ?? json['created_at'] ?? '',
+      autorFotoUrl: json['foto'] ?? json['fotoUrl'] ?? json['autorFoto'],
     );
   }
 }
@@ -68,19 +68,28 @@ class TemaModel {
       respuestasList = rawResp.map((r) => RespuestaModel.fromJson(r)).toList();
     }
 
+    // Determinar la cantidad de respuestas
+    int cantidad = 0;
+    if (json['totalRespuestas'] != null) {
+      cantidad = int.tryParse(json['totalRespuestas'].toString()) ?? 0;
+    } else if (json['cantidadRespuestas'] != null) {
+      cantidad = int.tryParse(json['cantidadRespuestas'].toString()) ?? 0;
+    } else if (rawResp is List) {
+      cantidad = rawResp.length;
+    }
+
     return TemaModel(
       id: json['id']?.toString() ?? '',
       titulo: json['titulo'] ?? '',
       descripcion: json['descripcion'] ?? json['contenido'] ?? '',
       autor: json['autor'] ?? json['nombre'] ?? 'Anónimo',
-      fecha: json['fecha'] ?? '',
-      vehiculo: json['vehiculo'] ?? json['auto'],
-      vehiculoFotoUrl: json['vehiculoFoto'] ?? json['foto'],
-      autorFotoUrl: json['autorFoto'] ?? json['fotoAutor'],
-      cantidadRespuestas: int.tryParse(json['cantidadRespuestas']?.toString() ??
-              json['respuestas_count']?.toString() ??
-              (rawResp is List ? rawResp.length.toString() : '0')) ??
-          0,
+      fecha: json['fecha'] ?? json['created_at'] ?? '',
+      vehiculo: json['vehiculo'] ?? json['auto'] ?? json['vehiculo_nombre'],
+      vehiculoFotoUrl:
+          json['vehiculoFoto'] ?? json['vehiculo_foto'] ?? json['foto'],
+      autorFotoUrl:
+          json['autorFoto'] ?? json['autor_foto'] ?? json['fotoAutor'],
+      cantidadRespuestas: cantidad,
       respuestas: respuestasList,
     );
   }

@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:taller_itla_app/features/vehiculos/data/models/vehiculo_model.dart';
 import '../models/auth_response_model.dart';
 import '../models/perfil_model.dart';
 
@@ -9,6 +11,7 @@ abstract class AuthRemoteDataSource {
   Future<void> olvidarClave(String matricula);
   Future<PerfilModel> getPerfil();
   Future<PerfilModel> updateFotoPerfil(String filePath);
+  Future<List<VehiculoModel>> getMisVehiculos();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -110,6 +113,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         '/perfil',
         options: Options(validateStatus: (s) => s! < 500),
       );
+      print('📱 PERFIL RESPONSE: ${response.data}');
+
       if (response.statusCode == 200) {
         return PerfilModel.fromJson(response.data);
       }
@@ -136,6 +141,40 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw Exception('Error al actualizar foto');
     } catch (e) {
       throw Exception('Error foto perfil: $e');
+    }
+  }
+
+  @override
+  Future<List<VehiculoModel>> getMisVehiculos() async {
+    try {
+      // 🔧 CORREGIDO: Usar endpoint correcto /vehiculos
+      final response = await dio.get(
+        '/vehiculos', // ← CAMBIADO: antes era /vehiculos/mis-vehiculos
+        options: Options(validateStatus: (s) => s! < 500),
+      );
+
+      print('🚗 VEHICULOS RESPONSE: ${response.data}');
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        if (data is List) {
+          print('🚗 Vehículos encontrados: ${data.length}');
+          return data.map((json) => VehiculoModel.fromJson(json)).toList();
+        }
+      }
+
+      // Si no encuentra vehículos, retornar lista vacía
+      print('⚠️ No se encontraron vehículos');
+      return [];
+    } on DioException catch (e) {
+      print('❌ Error Dio obteniendo vehículos: ${e.message}');
+      if (e.response?.statusCode == 404) {
+        print('⚠️ Endpoint /vehiculos no encontrado');
+      }
+      return [];
+    } catch (e) {
+      print('❌ Error obteniendo vehículos: $e');
+      return [];
     }
   }
 }

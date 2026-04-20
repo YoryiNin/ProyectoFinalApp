@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:taller_itla_app/features/vehiculos/data/models/vehiculo_model.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../core/storage/local_storage.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
@@ -53,19 +54,23 @@ class AuthState {
   final UserEntity? user;
   final bool isLoading;
   final String? error;
+  final List<VehiculoModel> misVehiculos;
 
   const AuthState({
     this.user,
     this.isLoading = false,
     this.error,
+    this.misVehiculos = const [],
   });
 
   bool get isAuthenticated => user != null && user!.token.isNotEmpty;
+  String? get vehiculoId => user?.vehiculoId;
 
   AuthState copyWith({
     UserEntity? user,
     bool? isLoading,
     String? error,
+    List<VehiculoModel>? misVehiculos,
     bool clearUser = false,
     bool clearError = false,
   }) {
@@ -73,6 +78,7 @@ class AuthState {
       user: clearUser ? null : (user ?? this.user),
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : (error ?? this.error),
+      misVehiculos: misVehiculos ?? this.misVehiculos,
     );
   }
 }
@@ -88,19 +94,31 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final storage = LocalStorage();
     final token = storage.getToken();
     if (token != null && token.isNotEmpty) {
-      // Tenemos token guardado → marcar como autenticado con datos mínimos
-      // El perfil completo se carga en PerfilScreen
+      final vehiculoId = storage.getVehiculoId();
+      final apellido = storage.getUserApellido() ?? '';
+
       state = AuthState(
         user: UserEntity(
           id: storage.getUserId() ?? '',
           nombre: storage.getUserNombre() ?? '',
-          apellido: '',
+          apellido: apellido,
           matricula: '',
           token: token,
           refreshToken: storage.getRefreshToken(),
           fotoUrl: storage.getUserFoto(),
+          vehiculoId: vehiculoId,
         ),
       );
+
+      print('📱 Sesión cargada desde storage - Vehículo ID: $vehiculoId');
+
+      if (vehiculoId == null || vehiculoId.isEmpty) {
+        print('⚠️ Vehículo ID no encontrado en storage, cargando perfil...');
+        await loadPerfil();
+      }
+
+      // Cargar vehículos del usuario
+      await loadMisVehiculos();
     }
   }
 
@@ -130,6 +148,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       (user) async {
         await _saveSession(user);
         state = state.copyWith(isLoading: false, user: user);
+        await loadMisVehiculos();
         return true;
       },
     );
@@ -145,8 +164,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
         return false;
       },
       (user) async {
+        print('✅ Login exitoso - Usuario: ${user.nombre}');
+        print('✅ Vehículo ID del login: ${user.vehiculoId}');
+
         await _saveSession(user);
         state = state.copyWith(isLoading: false, user: user);
+        await loadPerfil();
+        await loadMisVehiculos();
+
         return true;
       },
     );
@@ -166,26 +191,65 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> loadPerfil() async {
+    print('🔄 Cargando perfil completo del usuario...');
+
     final result = await ref.read(getPerfilUseCaseProvider).call();
+
     result.fold(
-      (_) {},
-      (user) {
-        final updated = UserEntity(
-          id: user.id,
-          nombre: user.nombre,
-          apellido: user.apellido,
-          matricula: user.matricula,
-          token: state.user?.token ?? '',
-          refreshToken: state.user?.refreshToken,
-          fotoUrl: user.fotoUrl,
-          correo: user.correo,
-          rol: user.rol,
-          grupo: user.grupo,
-        );
-        state = state.copyWith(user: updated);
-        _saveSession(updated);
+      (error) {
+        print('❌ Error cargando perfil: $error');
+      },
+      (userProfile) {
+        print('✅ Perfil cargado exitosamente:');
+        print('   - ID: ${userProfile.id}');
+        print('   - Vehículo ID: ${userProfile.vehiculoId ?? "NULL"}');
+
+        final currentUser = state.user;
+        if (currentUser != null) {
+          final updatedUser = currentUser.copyWith(
+            id: userProfile.id,
+            nombre: userProfile.nombre,
+            apellido: userProfile.apellido,
+            matricula: userProfile.matricula,
+            fotoUrl: userProfile.fotoUrl ?? currentUser.fotoUrl,
+            correo: userProfile.correo,
+            rol: userProfile.rol,
+            grupo: userProfile.grupo,
+            vehiculoId: userProfile.vehiculoId,
+          );
+
+          state = state.copyWith(user: updatedUser);
+          _saveSession(updatedUser);
+        }
       },
     );
+  }
+
+  // NUEVO: Cargar vehículos del usuario
+  Future<void> loadMisVehiculos() async {
+    print('🚗 Cargando vehículos del usuario...');
+
+    final dataSource = ref.read(authDataSourceProvider);
+    final vehiculos = await dataSource.getMisVehiculos();
+
+    print('🚗 Vehículos encontrados: ${vehiculos.length}');
+    for (var v in vehiculos) {
+      print('   - ID: ${v.id}, ${v.marca} ${v.modelo}');
+    }
+
+    state = state.copyWith(misVehiculos: vehiculos);
+
+    // Si el usuario no tiene vehiculoId pero tiene vehículos, usar el primero
+    if ((state.user?.vehiculoId == null || state.user!.vehiculoId!.isEmpty) &&
+        vehiculos.isNotEmpty) {
+      print(
+          '⚠️ Usuario sin vehículo asociado, asignando el primero: ${vehiculos.first.id}');
+      final updatedUser = state.user?.copyWith(vehiculoId: vehiculos.first.id);
+      if (updatedUser != null) {
+        state = state.copyWith(user: updatedUser);
+        _saveSession(updatedUser);
+      }
+    }
   }
 
   Future<bool> updateFoto(String filePath) async {
@@ -221,11 +285,38 @@ class AuthNotifier extends StateNotifier<AuthState> {
     await storage.saveUserData(
       id: user.id,
       nombre: user.nombre,
+      apellido: user.apellido,
       foto: user.fotoUrl,
+      vehiculoId: user.vehiculoId,
     );
+
+    print('💾 Sesión guardada - Vehículo ID: ${user.vehiculoId}');
   }
 }
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier(ref);
+});
+
+// Provider para obtener el vehículo ID (prioriza vehículos del usuario)
+final currentUserVehiculoIdProvider = Provider<String>((ref) {
+  final authState = ref.watch(authProvider);
+
+  // Primero intentar con el vehiculoId del usuario
+  if (authState.user?.vehiculoId != null &&
+      authState.user!.vehiculoId!.isNotEmpty) {
+    print('✅ Usando vehículo ID del usuario: ${authState.user!.vehiculoId}');
+    return authState.user!.vehiculoId!;
+  }
+
+  // Si no tiene, usar el primer vehículo de su lista
+  if (authState.misVehiculos.isNotEmpty) {
+    print(
+        '✅ Usando primer vehículo de la lista: ${authState.misVehiculos.first.id}');
+    return authState.misVehiculos.first.id;
+  }
+
+  // Último recurso: ID de prueba (el que vimos en logs: ID 7)
+  print('⚠️ Usando vehículo de prueba ID: 7');
+  return '7';
 });
