@@ -9,6 +9,7 @@ class PerfilModel {
   final String? fotoUrl;
   final String? rol;
   final String? grupo;
+  final String? vehiculoId;
 
   PerfilModel({
     required this.id,
@@ -19,6 +20,7 @@ class PerfilModel {
     this.fotoUrl,
     this.rol,
     this.grupo,
+    this.vehiculoId,
   });
 
   factory PerfilModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,8 @@ class PerfilModel {
       fotoUrl: data['foto'] ?? data['fotoUrl'],
       rol: data['rol'],
       grupo: data['grupo'],
+      vehiculoId:
+          data['vehiculo_id']?.toString() ?? data['vehiculoId']?.toString(),
     );
   }
 }
@@ -42,10 +46,11 @@ extension PerfilModelX on PerfilModel {
         nombre: nombre,
         apellido: apellido,
         matricula: matricula,
-        token: '', // El perfil no incluye token
+        token: '',
         fotoUrl: fotoUrl,
         correo: correo,
         rol: rol,
         grupo: grupo,
+        vehiculoId: vehiculoId,
       );
 }

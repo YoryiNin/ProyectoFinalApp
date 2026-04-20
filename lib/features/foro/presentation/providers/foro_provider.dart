@@ -9,6 +9,7 @@ import '../../domain/usecases/get_temas_publicos_usecase.dart';
 import '../../domain/usecases/crear_tema_usecase.dart';
 import '../../domain/usecases/responder_tema_usecase.dart';
 import '../../domain/usecases/get_mis_temas_usecase.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 
 // DataSources
 final foroPublicDataSourceProvider = Provider<ForoPublicDataSource>((ref) {
@@ -49,19 +50,68 @@ final getMisTemasUseCaseProvider = Provider<GetMisTemasUseCase>((ref) {
   return GetMisTemasUseCase(ref.read(foroRepositoryProvider));
 });
 
-// Providers
+// Provider para obtener el vehículoId (usa el nuevo provider de auth)
+final currentUserVehiculoIdProvider = Provider<String>((ref) {
+  return ref.watch(authProvider).vehiculoId ?? '';
+});
+
+// Providers de datos
 final temasListProvider = FutureProvider<List<TemaEntity>>((ref) async {
-  final result = await ref.read(getTemasUseCaseProvider)();
-  return result.fold((e) => throw Exception(e), (t) => t);
+  try {
+    final result = await ref.read(getTemasUseCaseProvider)();
+    return result.fold(
+      (e) {
+        print('❌ Error cargando temas: $e');
+        return <TemaEntity>[];
+      },
+      (t) {
+        print('✅ Temas cargados: ${t.length}');
+        return t;
+      },
+    );
+  } catch (e) {
+    print('❌ Excepción cargando temas: $e');
+    return <TemaEntity>[];
+  }
 });
 
 final temaDetalleProvider =
     FutureProvider.family<TemaEntity, String>((ref, id) async {
-  final result = await ref.read(getTemaDetalleUseCaseProvider)(id);
-  return result.fold((e) => throw Exception(e), (t) => t);
+  try {
+    final result = await ref.read(getTemaDetalleUseCaseProvider)(id);
+    return result.fold(
+      (e) {
+        print('❌ Error cargando detalle: $e');
+        throw Exception(e);
+      },
+      (t) => t,
+    );
+  } catch (e) {
+    print('❌ Excepción cargando detalle: $e');
+    throw Exception('Error al cargar detalle');
+  }
 });
 
 final misTemasProvider = FutureProvider<List<TemaEntity>>((ref) async {
-  final result = await ref.read(getMisTemasUseCaseProvider)();
-  return result.fold((e) => throw Exception(e), (t) => t);
+  try {
+    final authState = ref.watch(authProvider);
+    if (!authState.isAuthenticated) {
+      return <TemaEntity>[];
+    }
+
+    final result = await ref.read(getMisTemasUseCaseProvider)();
+    return result.fold(
+      (e) {
+        print('❌ Error cargando mis temas: $e');
+        return <TemaEntity>[];
+      },
+      (t) {
+        print('✅ Mis temas cargados: ${t.length}');
+        return t;
+      },
+    );
+  } catch (e) {
+    print('❌ Excepción cargando mis temas: $e');
+    return <TemaEntity>[];
+  }
 });

@@ -14,37 +14,52 @@ class ForoPublicDataSourceImpl implements ForoPublicDataSource {
   @override
   Future<List<TemaModel>> getTemas() async {
     try {
+      print('🚀 GET /foro/temas');
+
       final response = await dio.get(
-        '/publico/foro',
+        '/foro/temas',
         options: Options(validateStatus: (s) => s! < 500),
       );
 
-      if (response.statusCode == 200 && response.data['data'] != null) {
-        final List<dynamic> data =
-            response.data['data'] is List ? response.data['data'] : [];
-        return data.map((json) => TemaModel.fromJson(json)).toList();
+      print('📝 Status code: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        if (data is List) {
+          print('✅ Temas encontrados: ${data.length}');
+          return data.map((json) => TemaModel.fromJson(json)).toList();
+        }
       }
       return [];
     } catch (e) {
-      throw Exception('Error al cargar el foro: $e');
+      print('❌ Error: $e');
+      return [];
     }
   }
 
   @override
   Future<TemaModel> getTemaDetalle(String id) async {
     try {
+      print('🚀 GET /foro/detalle?id=$id');
+
       final response = await dio.get(
-        '/publico/foro/detalle',
+        '/foro/detalle',
         queryParameters: {'id': id},
         options: Options(validateStatus: (s) => s! < 500),
       );
 
-      if (response.statusCode == 200 && response.data['data'] != null) {
-        return TemaModel.fromJson(response.data['data']);
+      print('📝 Status code: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        if (data != null) {
+          return TemaModel.fromJson(data);
+        }
       }
       throw Exception('Tema no encontrado');
     } catch (e) {
-      throw Exception('Error al cargar detalle del tema: $e');
+      print('❌ Error: $e');
+      throw Exception('Error al cargar detalle: $e');
     }
   }
 }

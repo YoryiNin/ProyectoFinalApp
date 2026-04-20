@@ -9,6 +9,7 @@ class UserEntity {
   final String? grupo;
   final String token;
   final String? refreshToken;
+  final String? vehiculoId;
 
   const UserEntity({
     required this.id,
@@ -21,6 +22,7 @@ class UserEntity {
     this.rol,
     this.grupo,
     this.refreshToken,
+    this.vehiculoId,
   });
 
   String get nombreCompleto => '$nombre $apellido'.trim();
@@ -36,6 +38,7 @@ class UserEntity {
     String? rol,
     String? grupo,
     String? refreshToken,
+    String? vehiculoId,
   }) {
     return UserEntity(
       id: id ?? this.id,
@@ -48,6 +51,7 @@ class UserEntity {
       rol: rol ?? this.rol,
       grupo: grupo ?? this.grupo,
       refreshToken: refreshToken ?? this.refreshToken,
+      vehiculoId: vehiculoId ?? this.vehiculoId,
     );
   }
 }

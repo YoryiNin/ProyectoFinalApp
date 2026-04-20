@@ -11,6 +11,7 @@ class AuthResponseModel {
   final String? correo;
   final String? rol;
   final String? grupo;
+  final String? vehiculoId;
 
   AuthResponseModel({
     required this.token,
@@ -23,11 +24,14 @@ class AuthResponseModel {
     this.correo,
     this.rol,
     this.grupo,
+    this.vehiculoId,
   });
 
   factory AuthResponseModel.fromJson(Map<String, dynamic> json) {
-    // El API puede devolver el token en distintos niveles
     final data = json['data'] ?? json;
+
+    print('🔍 AuthResponseModel - Datos recibidos: $data');
+
     return AuthResponseModel(
       token: data['token'] ?? json['token'] ?? '',
       refreshToken: data['refreshToken'] ?? json['refreshToken'],
@@ -39,6 +43,9 @@ class AuthResponseModel {
       correo: data['correo'] ?? json['correo'],
       rol: data['rol'] ?? json['rol'],
       grupo: data['grupo'] ?? json['grupo'],
+      vehiculoId: data['vehiculo_id']?.toString() ??
+          data['vehiculoId']?.toString() ??
+          data['auto_id']?.toString(),
     );
   }
 }
@@ -55,5 +62,6 @@ extension AuthResponseModelX on AuthResponseModel {
         correo: correo,
         rol: rol,
         grupo: grupo,
+        vehiculoId: vehiculoId,
       );
 }

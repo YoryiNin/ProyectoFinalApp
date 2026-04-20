@@ -5,7 +5,9 @@ import 'package:taller_itla_app/theme/app_text_styles.dart';
 import '../providers/foro_provider.dart';
 
 class CrearTemaScreen extends ConsumerStatefulWidget {
-  const CrearTemaScreen({super.key});
+  final String vehiculoId;
+
+  const CrearTemaScreen({super.key, required this.vehiculoId});
 
   @override
   ConsumerState<CrearTemaScreen> createState() => _CrearTemaScreenState();
@@ -15,30 +17,44 @@ class _CrearTemaScreenState extends ConsumerState<CrearTemaScreen> {
   final _formKey = GlobalKey<FormState>();
   final _tituloCtrl = TextEditingController();
   final _descripcionCtrl = TextEditingController();
-
-  // Si tienes vehiculos del usuario, carga la lista y usa un dropdown.
-  // Por ahora usamos un TextField simple para el vehiculo_id.
-  final _vehiculoIdCtrl = TextEditingController();
-
   bool _isLoading = false;
 
   @override
   void dispose() {
     _tituloCtrl.dispose();
     _descripcionCtrl.dispose();
-    _vehiculoIdCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
+    // Validación mejorada
+    if (widget.vehiculoId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No se encontró un vehículo asociado a tu cuenta.'),
+          backgroundColor: AppColors.error,
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
 
+    final titulo = _tituloCtrl.text.trim();
+    final descripcion = _descripcionCtrl.text.trim();
+
+    print('📝 Creando tema con:');
+    print('  - vehiculoId: ${widget.vehiculoId}');
+    print('  - titulo: $titulo');
+    print('  - descripcion: $descripcion');
+
     final result = await ref.read(crearTemaUseCaseProvider).call(
-          _vehiculoIdCtrl.text.trim(),
-          _tituloCtrl.text.trim(),
-          _descripcionCtrl.text.trim(),
+          widget.vehiculoId,
+          titulo,
+          descripcion,
         );
 
     if (!mounted) return;
@@ -46,22 +62,36 @@ class _CrearTemaScreenState extends ConsumerState<CrearTemaScreen> {
 
     result.fold(
       (error) {
+        print('❌ Error al crear tema: $error');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text(error),
+            backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 3),
+          ),
         );
       },
       (tema) {
-        // Invalidar la lista para que se refresque
+        print('✅ Tema creado exitosamente:');
+        print('  - ID: ${tema.id}');
+        print('  - Título: ${tema.titulo}');
+        print('  - Autor: ${tema.autor}');
+
+        // Invalidar todos los providers relacionados
         ref.invalidate(temasListProvider);
         ref.invalidate(misTemasProvider);
 
+        // Mostrar mensaje de éxito
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Tema publicado correctamente'),
+            content: Text('¡Tema publicado correctamente!'),
             backgroundColor: AppColors.success,
+            duration: Duration(seconds: 2),
           ),
         );
-        Navigator.pop(context, true); // true = fue creado
+
+        // Volver con resultado exitoso
+        Navigator.pop(context, true);
       },
     );
   }
@@ -125,25 +155,31 @@ class _CrearTemaScreenState extends ConsumerState<CrearTemaScreen> {
               ),
               const SizedBox(height: 24),
 
-              // ID del vehículo
-              Text('Vehículo', style: AppTextStyles.labelMedium),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _vehiculoIdCtrl,
-                keyboardType: TextInputType.number,
-                style: AppTextStyles.bodyMedium
-                    .copyWith(color: AppColors.textPrimary),
-                decoration: const InputDecoration(
-                  hintText: 'ID de tu vehículo',
-                  prefixIcon: Icon(Icons.directions_car_outlined),
+              // Vehículo info
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) {
-                    return 'Ingresa el ID de tu vehículo';
-                  }
-                  return null;
-                },
+                child: Row(
+                  children: [
+                    const Icon(Icons.directions_car_outlined,
+                        size: 16, color: AppColors.primary),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Publicando en vehículo ID: ${widget.vehiculoId}',
+                        style: AppTextStyles.bodySmall
+                            .copyWith(color: AppColors.primary),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
+
               const SizedBox(height: 20),
 
               // Título
@@ -162,9 +198,7 @@ class _CrearTemaScreenState extends ConsumerState<CrearTemaScreen> {
                   if (v == null || v.trim().isEmpty) {
                     return 'El título es obligatorio';
                   }
-                  if (v.trim().length < 5) {
-                    return 'Mínimo 5 caracteres';
-                  }
+                  if (v.trim().length < 5) return 'Mínimo 5 caracteres';
                   return null;
                 },
               ),
@@ -189,9 +223,7 @@ class _CrearTemaScreenState extends ConsumerState<CrearTemaScreen> {
                   if (v == null || v.trim().isEmpty) {
                     return 'La descripción es obligatoria';
                   }
-                  if (v.trim().length < 10) {
-                    return 'Mínimo 10 caracteres';
-                  }
+                  if (v.trim().length < 10) return 'Mínimo 10 caracteres';
                   return null;
                 },
               ),
