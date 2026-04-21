@@ -30,9 +30,10 @@ const List<IntegranteModel> equipoItla = [
     telegram: 'YoryiNin',
     correo: 'Yoryi.Nin@itla.edu.do',
     rol: 'Líder de Proyecto',
+    fotoAsset: 'assets/images/team/mi_foto.jpg',
   ),
 
-// 👤 Marcell Canario 
+// 👤 Marcell Canario
   IntegranteModel(
     nombre: 'Marcell Junior Canario Jiminian',
     matricula: '2020-9759',
@@ -62,7 +63,7 @@ const List<IntegranteModel> equipoItla = [
     rol: 'Desarrollador',
     fotoAsset: 'assets/images/team/robertson.jpg',
   ),
-  
+
   // 👤 Ismael
   IntegranteModel(
     nombre: 'George Ismael Hodge Abad',
