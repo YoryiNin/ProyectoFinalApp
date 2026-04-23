@@ -51,6 +51,7 @@ const List<IntegranteModel> equipoItla = [
     telegram: 'Hansell Bonilla',
     correo: '20230220@itla.edu.do',
     rol: 'Desarrollador',
+    fotoAsset: 'assets/images/team/Hansell.jpeg',
   ),
 
   // 👤 Robertson
